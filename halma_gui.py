@@ -112,7 +112,6 @@ class Board(tk.Frame):
                 for lst in self.buttons:
                     for button in lst:
                         if button.image == self.hlred:
-                            new_image = self.red
                             button.config(image=self.red)
                             button.image = self.red
                         elif button.image == self.hlgreen:
@@ -123,10 +122,10 @@ class Board(tk.Frame):
                             button.image = self.background
                 
                 # Add piece to destination
-                if self.color == self.red:
+                if self.color == self.red or self.color == self.hlred:
                     self.buttons[i][j].config(image=self.hlred)
                     self.buttons[i][j].image = self.hlred
-                else:
+                elif self.color == self.green or self.color == self.hlgreen:
                     self.buttons[i][j].config(image=self.hlgreen)
                     self.buttons[i][j].image = self.hlgreen
 
@@ -148,14 +147,7 @@ class Board(tk.Frame):
             
 
         # First click in move operation
-        elif self.buttons[i][j].image != self.background:
-
-            '''
-            if self.to_remove != []:
-                self.buttons[self.to_remove[0]][self.to_remove[1]].config(image=self.background)
-                self.buttons[self.to_remove[0]][self.to_remove[1]].image = self.background
-            '''
-            
+        elif self.buttons[i][j].image != self.background:        
 
             # Save necessary information for second click
             self.move = True
