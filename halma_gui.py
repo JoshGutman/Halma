@@ -1,10 +1,6 @@
 import tkinter as tk
 import sys
 
-# TODO:
-#  - Add some sort of highlight to buttons that have been changed in the last round
-#  - Valid move checker
-
 
 class Board(tk.Frame):
 
@@ -24,6 +20,8 @@ class Board(tk.Frame):
         self.green = tk.PhotoImage(file="images/green_{}.gif".format(self.image_size))
         self.background = tk.PhotoImage(file="images/background_{}.gif".format(self.image_size))
         self.highlight = tk.PhotoImage(file="images/highlight_{}.gif".format(self.image_size))
+        self.hlred = tk.PhotoImage(file="images/hlred_{}.gif".format(self.image_size))
+        self.hlgreen = tk.PhotoImage(file="images/hlgreen_{}.gif".format(self.image_size))
 
         # Used for moving a piece from one space to another
         self.move = False
@@ -47,6 +45,17 @@ class Board(tk.Frame):
         button_frame = tk.Frame(self.master)
         button_frame.pack()
 
+        # Create numbering and lettering for the board
+        letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
+                   'n','o','p','q','r','s','t','u','v','w','x','y','z']
+        for i in range(self.size):
+            temp_label = tk.Label(button_frame, text=str(self.size-i))
+            temp_label.grid(row=i,column=0)
+
+            temp_label = tk.Label(button_frame, text=letters[i])
+            temp_label.grid(row=self.size, column=i+1)
+        
+
         # Create and store all buttons in self.buttons
         self.buttons = []
         for i in range(self.size):
@@ -55,7 +64,7 @@ class Board(tk.Frame):
                 temp_button = tk.Button(button_frame, image=self.background, command=lambda x=i, y=j: self.action(x,y))
                 temp_button.image = self.background
                 temp_button.config(height=64,width=64)
-                temp_button.grid(row=i,column=j)
+                temp_button.grid(row=i,column=j+1)
                 to_append.append(temp_button) 
             self.buttons.append(to_append)
 
@@ -86,24 +95,47 @@ class Board(tk.Frame):
 
     # This method is run when a button is clicked
     def action(self, i, j):
+
+        # Takes in (i,j) and returns "letter-number"
+        def _notation(coords):
+            return chr(coords[1]+97) + "-" + str(-1*coords[0]+self.size)
         
         # Second click in move operation
         if self.move == True:
 
             x = self.to_remove[0]
             y = self.to_remove[1]
-
+        
             if (i,j) != (x,y):
+
+                # Remove any old highlighting from the board
+                for lst in self.buttons:
+                    for button in lst:
+                        if button.image == self.hlred:
+                            new_image = self.red
+                            button.config(image=self.red)
+                            button.image = self.red
+                        elif button.image == self.hlgreen:
+                            button.config(image=self.green)
+                            button.image = self.green
+                        elif button.image == self.highlight:
+                            button.config(image=self.background)
+                            button.image = self.background
+                
                 # Add piece to destination
-                self.buttons[i][j].config(image=self.color)
-                self.buttons[i][j].image = self.color
+                if self.color == self.red:
+                    self.buttons[i][j].config(image=self.hlred)
+                    self.buttons[i][j].image = self.hlred
+                else:
+                    self.buttons[i][j].config(image=self.hlgreen)
+                    self.buttons[i][j].image = self.hlgreen
 
                 # Remove piece from source
-                self.buttons[x][y].config(image=self.background)
-                self.buttons[x][y].image = self.background
+                self.buttons[x][y].config(image=self.highlight)
+                self.buttons[x][y].image = self.highlight
 
                 # Update status
-                self.status.config(text="Moved piece from ({},{}) to ({},{})".format(x,y,i,j))
+                self.status.config(text="Moved piece from  {}  to  {}".format(_notation((x,y)),_notation((i,j))))
                 
                 self.move_count += 1
 
@@ -114,10 +146,16 @@ class Board(tk.Frame):
             self.buttons[x][y].config(relief=tk.RAISED)
             self.move = False
             
-            
 
         # First click in move operation
         elif self.buttons[i][j].image != self.background:
+
+            '''
+            if self.to_remove != []:
+                self.buttons[self.to_remove[0]][self.to_remove[1]].config(image=self.background)
+                self.buttons[self.to_remove[0]][self.to_remove[1]].image = self.background
+            '''
+            
 
             # Save necessary information for second click
             self.move = True
@@ -125,8 +163,9 @@ class Board(tk.Frame):
             self.color = self.buttons[i][j].image
 
             # Update status and give clicked button a sunken effect
-            self.status.config(text="Moving piece at ({},{})...".format(i,j))
+            self.status.config(text="Moving piece at  {} ...".format(_notation((i,j))))
             self.buttons[i][j].config(relief=tk.SUNKEN) 
+
         
         # Click on empty space
         elif self.buttons[i][j].image == self.background:
