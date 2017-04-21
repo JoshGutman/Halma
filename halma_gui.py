@@ -1,15 +1,21 @@
 import tkinter as tk
-import sys
+from board import *
+
+class GUI:
+
+    def __init__(self, size):
+        root = tk.Tk()
+        root.wm_title("Halma")
+        window = Window(size, master=root)
+        window.mainloop()
 
 
-class Board(tk.Frame):
+class Window(tk.Frame):
 
     # If an 8x8 board is desired, size should be 8 (as opposed to 64)
     def __init__(self, size, master=None):
 
-        if size < 4:
-            print("Size too small. Program exiting...")
-            sys.exit()
+        assert size > 4
         
         super().__init__(master)
         self.master = master
@@ -30,6 +36,8 @@ class Board(tk.Frame):
 
         self.size = size
         self.move_count = 0
+
+        self.board = Board(size)
         
         self.create_widgets()
 
@@ -83,14 +91,16 @@ class Board(tk.Frame):
         
         # Attach sizemenu to gamemenu and gamemenu to menubar
         self.gamemenu.add_cascade(label="Size", menu=self.sizemenu)
-        self.menubar.add_cascade(label="Game", menu=self.gamemenu)
+        self.menubar.add_cascade(label="Menu", menu=self.gamemenu)
 
         self.gamemenu.add_separator()
 
         # Add Quit button to the menubar
-        self.gamemenu.add_command(label="Quit", command=root.destroy)
+        self.gamemenu.add_command(label="Quit", command=self.master.destroy)
         
         self.master.config(menu=self.menubar)
+
+        self.new_game()
 
 
     # This method is run when a button is clicked
@@ -98,7 +108,7 @@ class Board(tk.Frame):
 
         # Takes in (i,j) and returns "letter-number"
         def _notation(coords):
-            return chr(coords[1]+97) + "-" + str(-1*coords[0]+self.size)
+            return chr(coords[1]+97) + str(-1*coords[0]+self.size)
         
         # Second click in move operation
         if self.move == True:
@@ -137,6 +147,7 @@ class Board(tk.Frame):
                 self.status.config(text="Moved piece from  {}  to  {}".format(_notation((x,y)),_notation((i,j))))
                 
                 self.move_count += 1
+                self.board.move_piece((x,y), (i,j))
 
             else:
                 self.status.config(text="Move cancelled")
@@ -208,11 +219,7 @@ class Board(tk.Frame):
                 elif size == "normal":
                     button.config(height=64)
                     button.config(width=64)
-        
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    root.wm_title("Halma")
-    board = Board(8, master=root)
-    board.mainloop()
+    GUI(8)
