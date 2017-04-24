@@ -39,6 +39,7 @@ class Window(tk.Frame):
         self.move_count = 0
 
         self.board = Board(size)
+        self.only_allow_valid_moves = False
         
         self.create_widgets()
 
@@ -71,10 +72,9 @@ class Window(tk.Frame):
             to_append = []    
             for j in range(self.size):
                 temp_button = tk.Button(button_frame, image=self.background, command=lambda x=i, y=j: self.action(x,y))
-                temp_button.background = self.highlight
+                temp_button.image = self.background
                 temp_button.config(height=64,width=64)
                 temp_button.grid(row=i,column=j+1)
-                temp_button.background = "red"
                 to_append.append(temp_button) 
             self.buttons.append(to_append)
 
@@ -85,6 +85,8 @@ class Window(tk.Frame):
         
         # Add New Game button to the menubar
         self.gamemenu.add_command(label="New game", command=self.new_game)
+
+        self.gamemenu.add_radiobutton(label="Valid moves only", command=self.toggle_valid_moves)
 
         # Add Size submenu to menubar
         self.sizemenu = tk.Menu(self.gamemenu, tearoff=False)
@@ -109,9 +111,6 @@ class Window(tk.Frame):
     def action(self, i, j):
 
         
-            
-        
-            
         # Takes in (i,j) and returns "letter-number"
         def _notation(coords):
             return chr(coords[1]+97) + str(-1*coords[0]+self.size)
@@ -122,6 +121,14 @@ class Window(tk.Frame):
 
             x = self.to_remove[0]
             y = self.to_remove[1]
+
+            if self.only_allow_valid_moves:
+                moves = self.board.generate_moves(self.board.board[x][y].val)
+                if (i,j) not in moves[self.board.board[x][y]]:
+                    self.status.config(text="Invalid move.")
+                    self.buttons[x][y].config(relief=tk.RAISED)
+                    self.move = False
+                    return
         
             if (i,j) != (x,y):
 
@@ -157,11 +164,11 @@ class Window(tk.Frame):
                 self.board.move_piece((x,y), (i,j))
 
                 # check to see if the game is won
-                if self.board.checkWin() != "F":
-                    if self.board.checkWin() == "R":
-                        self.status.config(text="Red Player Has Won!!!!!!!!!!!!!!!!!")
-                    elif self.board.checkWin() == "G":
-                        self.status.config(text="Green Player Has Won!!!!!!!!!!!!!!!!!")
+                win = self.board.checkWin()
+                if win == "R":
+                    self.status.config(text="Red Player Has Won!!!!!!!!!!!!!!!!!")
+                elif win == "G":
+                    self.status.config(text="Green Player Has Won!!!!!!!!!!!!!!!!!")
 
             else:
                 self.status.config(text="Move cancelled")
@@ -172,7 +179,7 @@ class Window(tk.Frame):
             
 
         # First click in move operation
-        elif self.buttons[i][j].image != self.background:        
+        elif self.board.board[i][j].val != Board.EMPTY:
 
             # Save necessary information for second click
             self.move = True
@@ -185,14 +192,8 @@ class Window(tk.Frame):
 
         
         # Click on empty space
-        elif self.buttons[i][j].image == self.background:
-            if self.move_count % 2 == 0:
-                self.buttons[i][j].config(image=self.green)
-                self.buttons[i][j].image = self.green
-            else:
-                self.buttons[i][j].config(image=self.red)
-                self.buttons[i][j].image = self.red
-            self.move_count += 1
+        elif self.board.board[i][j].val == Board.EMPTY:
+            pass
 
 
     # Creates red and green circles in the top right and bottom left corners respectively
@@ -213,16 +214,17 @@ class Window(tk.Frame):
             for j in range(x-i):
                 self.buttons[i][self.size-j-1].config(image=self.red)
                 self.buttons[i][self.size-j-1].image = self.red
-                self.buttons[i][self.size-j-1].configure( bg = "darkred" )
+                #self.buttons[i][self.size-j-1].configure( bg = "darkred" )
                  
                 self.buttons[self.size-j-1][i].config(image=self.green)
                 self.buttons[self.size-j-1][i].image = self.green
-                self.buttons[self.size-j-1][i].configure( bg = "limegreen" )
+                #self.buttons[self.size-j-1][i].configure( bg = "limegreen" )
 
         # Update status bar
         self.status.config(text="New game started")
 
         self.move_count = 0
+        self.board.new_game()
 
 
 
@@ -238,6 +240,10 @@ class Window(tk.Frame):
                 elif size == "normal":
                     button.config(height=64)
                     button.config(width=64)
+
+
+    def toggle_valid_moves(self):
+        self.only_allow_valid_moves = not self.only_allow_valid_moves
 
 
 if __name__ == "__main__":
