@@ -8,7 +8,8 @@ class GUI:
         root.wm_title("Halma")
         window = Window(size, master=root)
         window.mainloop()
-
+        self.size = size
+        
 
 class Window(tk.Frame):
 
@@ -70,9 +71,10 @@ class Window(tk.Frame):
             to_append = []    
             for j in range(self.size):
                 temp_button = tk.Button(button_frame, image=self.background, command=lambda x=i, y=j: self.action(x,y))
-                temp_button.image = self.background
+                temp_button.background = self.highlight
                 temp_button.config(height=64,width=64)
                 temp_button.grid(row=i,column=j+1)
+                temp_button.background = "red"
                 to_append.append(temp_button) 
             self.buttons.append(to_append)
 
@@ -106,9 +108,14 @@ class Window(tk.Frame):
     # This method is run when a button is clicked
     def action(self, i, j):
 
+        
+            
+        
+            
         # Takes in (i,j) and returns "letter-number"
         def _notation(coords):
             return chr(coords[1]+97) + str(-1*coords[0]+self.size)
+
         
         # Second click in move operation
         if self.move == True:
@@ -149,6 +156,13 @@ class Window(tk.Frame):
                 self.move_count += 1
                 self.board.move_piece((x,y), (i,j))
 
+                # check to see if the game is won
+                if self.board.checkWin() != "F":
+                    if self.board.checkWin() == "R":
+                        self.status.config(text="Red Player Has Won!!!!!!!!!!!!!!!!!")
+                    elif self.board.checkWin() == "G":
+                        self.status.config(text="Green Player Has Won!!!!!!!!!!!!!!!!!")
+
             else:
                 self.status.config(text="Move cancelled")
 
@@ -185,20 +199,25 @@ class Window(tk.Frame):
     # Run when the "New game" menubar button is pressed
     def new_game(self):
 
+        
         # Get rid of any other circles on the board
         for i in range(self.size):
             for j in range(self.size):
                 self.buttons[i][j].config(image=self.background)
                 self.buttons[i][j].image = self.background
+                
 
         # Place red and green circles
-        for i in range(4):
-            for j in range(4-i):
+        x = self.size//2
+        for i in range(x):
+            for j in range(x-i):
                 self.buttons[i][self.size-j-1].config(image=self.red)
                 self.buttons[i][self.size-j-1].image = self.red
-
+                self.buttons[i][self.size-j-1].configure( bg = "darkred" )
+                 
                 self.buttons[self.size-j-1][i].config(image=self.green)
                 self.buttons[self.size-j-1][i].image = self.green
+                self.buttons[self.size-j-1][i].configure( bg = "limegreen" )
 
         # Update status bar
         self.status.config(text="New game started")
@@ -222,4 +241,13 @@ class Window(tk.Frame):
 
 
 if __name__ == "__main__":
-    GUI(8)
+    if len(sys.argv) == 2:           
+        size = int(sys.argv[1])
+        if size == 8 or size == 10 or size == 16:
+            GUI(size)
+        else:
+            GUI(8)
+    else:
+        GUI(8)
+
+

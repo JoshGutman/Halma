@@ -1,3 +1,5 @@
+import sys
+
 class Board:
 
     GREEN = "G"
@@ -17,6 +19,30 @@ class Board:
             for j in range(4-i):
                 self.board[i][size-j-1].val = Board.RED
                 self.board[size-j-1][i].val = Board.GREEN
+                
+    def checkWin(self):
+        x = self.size//2
+        green_count = 0
+        red_count = 0
+        for i in range(0, self.size//2):
+            for j in range(x, self.size):
+                if self.board[i][j].val == "G":
+                    green_count += 1
+            x += 1
+
+        x = self.size//2
+        for i in range(self.size-1, self.size//2-1, -1):
+            for j in range(0, x):
+                if self.board[i][j].val == "R":
+                    red_count += 1
+            x -= 1
+        
+        if green_count == 10:
+            return "G"
+        elif red_count == 10:
+            return "R"
+        else:
+            return "F"
 
         def _get_neighbors(coords, size):
 
