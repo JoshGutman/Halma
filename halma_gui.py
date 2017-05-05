@@ -164,7 +164,7 @@ class Window(tk.Frame):
                 self.board.move_piece((x,y), (i,j))
 
                 # check to see if the game is won
-                win = self.board.checkWin()
+                win = self.board.check_win()
                 if win == "R":
                     self.status.config(text="Red Player Has Won!!!!!!!!!!!!!!!!!")
                 elif win == "G":
@@ -209,6 +209,7 @@ class Window(tk.Frame):
                 
 
         # Place red and green circles
+        '''
         x = self.size//2
         for i in range(x):
             for j in range(x-i):
@@ -219,6 +220,16 @@ class Window(tk.Frame):
                 self.buttons[self.size-j-1][i].config(image=self.green)
                 self.buttons[self.size-j-1][i].image = self.green
                 #self.buttons[self.size-j-1][i].configure( bg = "limegreen" )
+        '''
+
+        for i in range(4):
+            for j in range(4-i):
+                self.buttons[i][j].config(image=self.red)
+                self.buttons[i][j].image = self.red
+
+                self.buttons[self.size-i-1][self.size-j-1].config(image=self.green)
+                self.buttons[self.size-i-1][self.size-j-1].image = self.green
+        
 
         # Update status bar
         self.status.config(text="New game started")

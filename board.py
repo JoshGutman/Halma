@@ -23,8 +23,17 @@ class Board:
 
         for i in range(4):
             for j in range(4-i):
+                '''
                 self.board[i][self.size-j-1].val = Board.RED
+                self.board[i][self.size-j-1].starting_position = Board.RED
                 self.board[self.size-j-1][i].val = Board.GREEN
+                self.board[self.size-j-1][i].starting_position = Board.GREEN
+                '''
+
+                self.board[i][j].val = Board.RED
+                self.board[i][j].starting_position = Board.RED
+                self.board[self.size-i-1][self.size-j-1].val = Board.GREEN
+                self.board[self.size-i-1][self.size-j-1].starting_position = Board.GREEN
 
         # Find neighbors for each node
         for lst in self.board:
@@ -34,7 +43,7 @@ class Board:
                     node.neighbors.append(self.board[c[0]][c[1]])
 
 
-
+    '''
     def checkWin(self):
         x = self.size//2
         green_count = 0
@@ -64,19 +73,61 @@ class Board:
                 coords = self._get_neighbors(node.coords, size)
                 for c in coords:
                     node.neighbors.append(self.board[c[0]][c[1]])
+    '''
 
+    # Returns "G" for green win, "R" for red win, "X" for no win
+    def check_win(self):
+        greens = []
+        reds = []
+        
+        for lst in self.board:
+            for node in lst:
+                if node.val == Board.GREEN:
+                    greens.append(node)
+                elif node.val == Board.RED:
+                    reds.append(node)
+
+        green_win = True
+        red_win = True
+
+        for g in greens:
+            if g.starting_position != Board.RED:
+                green_win = False
+                break
+
+        for r in reds:
+            if r.starting_position != Board.GREEN:
+                red_win = False
+                break
+
+        if green_win:
+            return Board.GREEN
+
+        if red_win:
+            return Board.RED
+
+        return Board.EMPTY
 
 
     # Returns a dictionary where all 10 nodes of the specified color are keys,
     # and a list of every valid move for the key as values
     def generate_moves(self, color):
+
+        # Return True if move is valid -- checks to make sure piece isn't
+        # going back into the its own starting position
+        def _check_starting_position(node, new_node):
+            if node.starting_position == node.val:
+                return True
+            elif new_node.starting_position == node.val:
+                return False
+
         moves = {}
 
         # Assign all pieces of team color as keys in moves dict
         for i in range(self.size):
             for j in range(self.size):
                 if self.board[i][j].val == color:
-                    moves[self.board[i][j]] = []
+                    moves[self.board[i][j]] = set()
 
 
         def _check_jumps(node):
@@ -115,7 +166,9 @@ class Board:
 
                     new_node = self.board[possible[0]][possible[1]]
                     if new_node.val == Board.EMPTY and new_node not in moves[move]:
-                        moves[move].append(new_node)
+                        if _check_starting_position(node, new_node) == True:
+                            pass
+                        moves[move].add(new_node)
                         _check_jumps(new_node)
 
 
@@ -124,7 +177,7 @@ class Board:
             # Check for normal moves
             for n in move.neighbors:
                 if n.val == Board.EMPTY:
-                    moves[move].append(n)
+                    moves[move].add(n)
 
             # Check for jumps
             _check_jumps(move)
@@ -192,6 +245,7 @@ class Node:
     def __init__(self, val, coords):
         self.val = val
         self.coords = coords
+        self.starting_position = Board.EMPTY
         self.neighbors = []
 
     def __str__(self):
