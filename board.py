@@ -8,6 +8,8 @@ class Board:
 
     def __init__(self, size):
         self.size = size
+        self.green_starts = []
+        self.red_starts = []
         self.new_game()
 
         
@@ -32,8 +34,11 @@ class Board:
 
                 self.board[i][j].val = Board.RED
                 self.board[i][j].starting_position = Board.RED
+                self.red_starts.append(self.board[i][j])
+                
                 self.board[self.size-i-1][self.size-j-1].val = Board.GREEN
                 self.board[self.size-i-1][self.size-j-1].starting_position = Board.GREEN
+                self.green_starts.append(self.board[self.size-i-1][self.size-j-1])
 
         # Find neighbors for each node
         for lst in self.board:
@@ -120,6 +125,8 @@ class Board:
                 return True
             elif new_node.starting_position == node.val:
                 return False
+            else:
+                return True
 
         moves = {}
 
@@ -167,8 +174,7 @@ class Board:
                     new_node = self.board[possible[0]][possible[1]]
                     if new_node.val == Board.EMPTY and new_node not in moves[move]:
                         if _check_starting_position(node, new_node) == True:
-                            pass
-                        moves[move].add(new_node)
+                            moves[move].add(new_node)
                         _check_jumps(new_node)
 
 
@@ -204,6 +210,8 @@ class Board:
 
         node2.val = node1.val
         node1.val = Board.EMPTY
+
+        return self.board
 
 
 
