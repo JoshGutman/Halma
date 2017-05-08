@@ -252,7 +252,7 @@ class Window(tk.Frame):
 
 
     def ai_vs_ai(self):
-        m = Minimax(3, None)
+        m = Minimax(1, None)
         i = 0
         while self.board.check_win() == Board.EMPTY:
             if i % 2 == 0:
