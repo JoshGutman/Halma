@@ -1,5 +1,6 @@
 import tkinter as tk
 from board import *
+from minimax import Minimax
 
 class GUI:
 
@@ -82,9 +83,14 @@ class Window(tk.Frame):
         # Add a menubar
         self.menubar = tk.Menu(self.master, tearoff=False)
         self.gamemenu = tk.Menu(self.menubar, tearoff=False)
+
+        #self.sim_menu = tk.Menu(self.menubar, tearoff=False)
+        #self.sim_menu.pack()
         
         # Add New Game button to the menubar
         self.gamemenu.add_command(label="New game", command=self.new_game)
+
+        self.gamemenu.add_command(label="Simulation", command=self.ai_vs_ai)
 
         self.gamemenu.add_radiobutton(label="Valid moves only", command=self.toggle_valid_moves)
 
@@ -161,7 +167,7 @@ class Window(tk.Frame):
                 self.status.config(text="Moved piece from  {}  to  {}".format(_notation((x,y)),_notation((i,j))))
                 
                 self.move_count += 1
-                self.board.move_piece((x,y), (i,j))
+                self.board = self.board.move_piece((x,y), (i,j))
 
                 # check to see if the game is won
                 win = self.board.check_win()
@@ -209,19 +215,6 @@ class Window(tk.Frame):
                 
 
         # Place red and green circles
-        '''
-        x = self.size//2
-        for i in range(x):
-            for j in range(x-i):
-                self.buttons[i][self.size-j-1].config(image=self.red)
-                self.buttons[i][self.size-j-1].image = self.red
-                #self.buttons[i][self.size-j-1].configure( bg = "darkred" )
-                 
-                self.buttons[self.size-j-1][i].config(image=self.green)
-                self.buttons[self.size-j-1][i].image = self.green
-                #self.buttons[self.size-j-1][i].configure( bg = "limegreen" )
-        '''
-
         for i in range(4):
             for j in range(4-i):
                 self.buttons[i][j].config(image=self.red)
@@ -255,6 +248,33 @@ class Window(tk.Frame):
 
     def toggle_valid_moves(self):
         self.only_allow_valid_moves = not self.only_allow_valid_moves
+
+
+
+    def ai_vs_ai(self):
+        m = Minimax(3, None)
+        i = 0
+        while self.board.check_win() == Board.EMPTY:
+            if i % 2 == 0:
+                team = Board.GREEN
+            else:
+                team = Board.RED
+            self.board = m.test(self.board, team)
+            i += 1
+            self.display_board(self.board)
+            self.master.update()
+
+    def display_board(self, board):
+        for i in range(board.size):
+            for j in range(board.size):
+                if board.board[i][j].val == Board.RED:
+                    color = self.red
+                elif board.board[i][j].val == Board.GREEN:
+                    color = self.green
+                else:
+                    color = self.background
+                self.buttons[i][j].config(image=color)
+                self.buttons[i][j].image = color
 
 
 if __name__ == "__main__":
