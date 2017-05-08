@@ -8,20 +8,21 @@ class Minimax:
         self.board = board
         self.time_limit = time_limit
         self.alpha_beta = alpha_beta
+        self.depth_limit = 1
+        self.current_depth =0 
 
-    def score(self):
-        red_score = 0
-        green_score = 0
+    def score(self, board, team):
+        score = 0
 
         def _distance(node1, node2):
-            #return abs(node2.coords[0]-node1.coords[0]) + abs(node2.coords[1]-node1.coords[1])
-            return math.sqrt((node1.coords[0]-node2.coords[0])**2 + (node1.coords[1]-node2.coords[1])**2)
+            return abs(node2.coords[0]-node1.coords[0]) + abs(node2.coords[1]-node1.coords[1])
+            #return math.sqrt((node1.coords[0]-node2.coords[0])**2 + (node1.coords[1]-node2.coords[1])**2)
         
         def _least_distance(node):
             if node.val == Board.GREEN:
-                target = self.board.red_starts
+                target = board.red_starts
             else:
-                target = self.board.green_starts
+                target = board.green_starts
 
             minimum = _distance(node, target[0])
             n = target[0]
@@ -34,36 +35,63 @@ class Minimax:
             
             
 
-        reds = []
-        greens = []
+        pieces = []
 
-        for lst in self.board.board:
+        for lst in board.board:
             for node in lst:
-                if node.val == Board.RED:
-                    reds.append(node)
-                elif node.val == Board.GREEN:
-                    greens.append(node)
+                if node.val == team:
+                    pieces.append(node)
 
-        for r in reds:
-            red_score += _least_distance(r)[1]
+        for p in pieces:
+            score += _least_distance(p)[1]
 
-        for g in greens:
-            green_score += _least_distance(g)[1]
-
-        return (red_score, green_score)
+        return score
 
 
-    def search(self):
-        if self.start_time = time.time()
 
-        def id_search(depth):
-            if time.time() - start_time >= self.time_limit:
+
+    def search(self, team):
+        '''
+        if time.time() - self.start_time >= self.time_limit:
+            return
+        i = 0
+        '''
+        initial_moves = self.board.generate_moves(team)
+
+        def id_search(board, team, start, end):
+            new_board = board.move_piece(start, end)
+            if new_board.check_win() != Board.EMPTY:
                 return
+            if self.score(new_board, team) < 59:
+                return
+            print(self.score(new_board, team))
+            
+            if team == Board.RED:
+                new_moves = new_board.generate_moves(Board.GREEN)
+                for key in new_moves:
+                    for value in new_moves[key]:
+                        id_search(new_board, Board.GREEN, key.coords, value.coords)
+            else:
+                new_moves = new_board.generate_moves(Board.RED)
+                for key in new_moves:
+                    for value in new_moves[key]:
+                        id_search(new_board, Board.RED, key.coords, value.coords)
+
+        for key in initial_moves:
+            for value in initial_moves[key]:
+                id_search(self.board, team, key.coords, value.coords)
+                
+            
+        
+            
 
             
 
 
 if __name__ == "__main__":
     b = Board(8)
+    print("TEsting:")
+    print(b)
+    print("\n\n\n")
     m = Minimax(b, None, None)
-    print(m.score())
+    m.search(Board.RED)

@@ -6,12 +6,32 @@ class Board:
     RED = "R"
     EMPTY = "X"
 
-    def __init__(self, size):
+    def __init__(self, size, board_array=None):
         self.size = size
         self.green_starts = []
         self.red_starts = []
-        self.new_game()
 
+        if board_array == None:
+            self.new_game()
+
+        else:
+            self.board = board_array
+            for i in range(4):
+                for j in range(4-i):
+
+                    self.board[i][j].starting_position = Board.RED
+                    self.red_starts.append(self.board[i][j])
+                    
+                    self.board[self.size-i-1][self.size-j-1].starting_position = Board.GREEN
+                    self.green_starts.append(self.board[self.size-i-1][self.size-j-1])
+
+            # Find neighbors for each node
+            for lst in self.board:
+                for node in lst:
+                    coords = self._get_neighbors(node.coords, self.size)
+                    for c in coords:
+                        node.neighbors.append(self.board[c[0]][c[1]])
+            
         
 
 
@@ -23,15 +43,9 @@ class Board:
             for j in range(self.size):
                 self.board[i].append(Node(Board.EMPTY, (i,j)))
 
+
         for i in range(4):
             for j in range(4-i):
-                '''
-                self.board[i][self.size-j-1].val = Board.RED
-                self.board[i][self.size-j-1].starting_position = Board.RED
-                self.board[self.size-j-1][i].val = Board.GREEN
-                self.board[self.size-j-1][i].starting_position = Board.GREEN
-                '''
-
                 self.board[i][j].val = Board.RED
                 self.board[i][j].starting_position = Board.RED
                 self.red_starts.append(self.board[i][j])
@@ -39,6 +53,7 @@ class Board:
                 self.board[self.size-i-1][self.size-j-1].val = Board.GREEN
                 self.board[self.size-i-1][self.size-j-1].starting_position = Board.GREEN
                 self.green_starts.append(self.board[self.size-i-1][self.size-j-1])
+
 
         # Find neighbors for each node
         for lst in self.board:
@@ -48,37 +63,6 @@ class Board:
                     node.neighbors.append(self.board[c[0]][c[1]])
 
 
-    '''
-    def checkWin(self):
-        x = self.size//2
-        green_count = 0
-        red_count = 0
-        for i in range(0, self.size//2):
-            for j in range(x, self.size):
-                if self.board[i][j].val == "G":
-                    green_count += 1
-            x += 1
-
-        x = self.size//2
-        for i in range(self.size-1, self.size//2-1, -1):
-            for j in range(0, x):
-                if self.board[i][j].val == "R":
-                    red_count += 1
-            x -= 1
-        
-        if green_count == 10:
-            return "G"
-        elif red_count == 10:
-            return "R"
-        else:
-            return "F"
-
-        for lst in self.board:
-            for node in lst:
-                coords = self._get_neighbors(node.coords, size)
-                for c in coords:
-                    node.neighbors.append(self.board[c[0]][c[1]])
-    '''
 
     # Returns "G" for green win, "R" for red win, "X" for no win
     def check_win(self):
@@ -134,7 +118,7 @@ class Board:
         for i in range(self.size):
             for j in range(self.size):
                 if self.board[i][j].val == color:
-                    moves[self.board[i][j]] = set()
+                    moves[self.board[i][j]] = []
 
 
         def _check_jumps(node):
@@ -174,7 +158,7 @@ class Board:
                     new_node = self.board[possible[0]][possible[1]]
                     if new_node.val == Board.EMPTY and new_node not in moves[move]:
                         if _check_starting_position(node, new_node) == True:
-                            moves[move].add(new_node)
+                            moves[move].append(new_node)
                         _check_jumps(new_node)
 
 
@@ -183,7 +167,7 @@ class Board:
             # Check for normal moves
             for n in move.neighbors:
                 if n.val == Board.EMPTY:
-                    moves[move].add(n)
+                    moves[move].append(n)
 
             # Check for jumps
             _check_jumps(move)
@@ -208,10 +192,23 @@ class Board:
         assert node1.val != Board.EMPTY
         assert node2.val == Board.EMPTY
 
-        node2.val = node1.val
-        node1.val = Board.EMPTY
+        #node2.val = node1.val
+        #node1.val = Board.EMPTY
 
-        return self.board
+        copy = []
+        for i in range(self.size):
+            copy.append([])
+            for j in range(self.size):
+                copy[i].append(Node(self.board[i][j].val, self.board[i][j].coords))
+
+
+        out = Board(self.size, copy)
+        target = out.board[coord1[0]][coord1[1]].val
+        out.board[coord1[0]][coord1[1]].val = Board.EMPTY
+        out.board[coord2[0]][coord2[1]].val = target
+
+
+        return out
 
 
 
@@ -244,6 +241,15 @@ class Board:
         return out
 
 
+    def __str__(self):
+        out = ""
+        for i in range(self.size):
+            for j in range(self.size):
+                out += str(self.board[i][j]) + " "
+            out += "\n"
+        return out
+
+
 
 
 
@@ -271,3 +277,9 @@ class Node:
 
     def __hash__(self):
         return hash(self.coords)
+
+
+if __name__ == "__main__":
+    b1 = Board(8)
+    print(b1)
+    
