@@ -2,6 +2,7 @@ import math
 import time
 from board import Board
 
+# 5:04 PM
 class Minimax:
 
     def __init__(self, board, time_limit, alpha_beta):
@@ -15,8 +16,8 @@ class Minimax:
         score = 0
 
         def _distance(node1, node2):
-            return abs(node2.coords[0]-node1.coords[0]) + abs(node2.coords[1]-node1.coords[1])
-            #return math.sqrt((node1.coords[0]-node2.coords[0])**2 + (node1.coords[1]-node2.coords[1])**2)
+            #return abs(node2.coords[0]-node1.coords[0]) + abs(node2.coords[1]-node1.coords[1])
+            return math.sqrt((node1.coords[0]-node2.coords[0])**2 + (node1.coords[1]-node2.coords[1])**2)
         
         def _least_distance(node):
             if node.val == Board.GREEN:
@@ -58,7 +59,9 @@ class Minimax:
         '''
         initial_moves = self.board.generate_moves(team)
 
-        def id_search(board, team, start, end):
+        def id_search(board, team, start, end, depth):
+            if depth >= 50:
+                return
             new_board = board.move_piece(start, end)
             if new_board.check_win() != Board.EMPTY:
                 return
@@ -70,16 +73,16 @@ class Minimax:
                 new_moves = new_board.generate_moves(Board.GREEN)
                 for key in new_moves:
                     for value in new_moves[key]:
-                        id_search(new_board, Board.GREEN, key.coords, value.coords)
+                        id_search(new_board, Board.GREEN, key.coords, value.coords, depth+1)
             else:
                 new_moves = new_board.generate_moves(Board.RED)
                 for key in new_moves:
                     for value in new_moves[key]:
-                        id_search(new_board, Board.RED, key.coords, value.coords)
+                        id_search(new_board, Board.RED, key.coords, value.coords, depth+1)
 
         for key in initial_moves:
             for value in initial_moves[key]:
-                id_search(self.board, team, key.coords, value.coords)
+                id_search(self.board, team, key.coords, value.coords, 0)
                 
             
         
