@@ -83,15 +83,11 @@ class Window(tk.Frame):
         # Add a menubar
         self.menubar = tk.Menu(self.master, tearoff=False)
         self.gamemenu = tk.Menu(self.menubar, tearoff=False)
-
-        #self.sim_menu = tk.Menu(self.menubar, tearoff=False)
-        #self.sim_menu.pack()
         
         # Add New Game button to the menubar
         self.gamemenu.add_command(label="New game", command=self.new_game)
 
-        self.gamemenu.add_command(label="Simulation", command=self.ai_vs_ai)
-
+        # Valid moves only button
         self.gamemenu.add_radiobutton(label="Valid moves only", command=self.toggle_valid_moves)
 
         # Add Size submenu to menubar
@@ -109,6 +105,16 @@ class Window(tk.Frame):
         self.gamemenu.add_command(label="Quit", command=self.master.destroy)
         
         self.master.config(menu=self.menubar)
+
+
+        self.aimenu = tk.Menu(self.menubar, tearoff=False)
+        self.aimenu.add_command(label="AI vs. AI", command=self.ai_vs_ai)
+        #self.aimenu.add_command(label="AI vs. Human", command=lambda:print(test))
+        self.ai_select = tk.Menu(self.aimenu, tearoff=False)
+        self.ai_select.add_command(label="AI is team RED", command=lambda:self.ai_vs_human(Board.RED))
+        self.ai_select.add_command(label="AI is team GREEN", command=lambda:self.ai_vs_human(Board.GREEN))
+        self.aimenu.add_cascade(label="AI vs. Human", menu=self.ai_select)
+        self.menubar.add_cascade(label="AI", menu=self.aimenu)
 
         self.new_game()
 
@@ -263,7 +269,7 @@ class Window(tk.Frame):
                 team = Board.GREEN
             else:
                 team = Board.RED
-            self.board = m.search(self.board, team)
+            self.board = m.search(self.board, team)[0]
             i += 1
             self.display_board(self.board)
             self.master.update()
@@ -279,6 +285,32 @@ class Window(tk.Frame):
                     color = self.background
                 self.buttons[i][j].config(image=color)
                 self.buttons[i][j].image = color
+
+
+    def ai_vs_human(self, team):
+        self.menubar.add_command(label="AI Go", command=self.ai_move)
+        self.ai_team = team
+        self.only_allow_valid_moves = True
+        # AI time limit defined here
+        self.m = Minimax(1, True)
+        self.master.update()
+
+
+    def ai_move(self):
+        result = self.m.search(self.board, self.ai_team)
+        self.board = self.board.move_piece(result[1].coords, result[2].coords)
+
+        self.display_board(self.board)
+
+        # Sorry...
+        self.buttons[result[1].coords[0]][result[1].coords[1]].config(image=self.highlight)
+        self.buttons[result[1].coords[0]][result[1].coords[1]].image = self.highlight
+        if self.ai_team == Board.RED:
+            self.buttons[result[2].coords[0]][result[2].coords[1]].config(image=self.hlred)
+            self.buttons[result[2].coords[0]][result[2].coords[1]].image = self.hlred
+        else:
+            self.buttons[result[2].coords[0]][result[2].coords[1]].config(image=self.hlgreen)
+            self.buttons[result[2].coords[0]][result[2].coords[1]].image = self.hlgreen
 
 
 if __name__ == "__main__":

@@ -127,7 +127,7 @@ class Minimax:
                         v = value
             self.depth_limit += 1
 
-        return board.move_piece(k.coords, v.coords)       
+        return board.move_piece(k.coords, v.coords), k, v  
         
             
 
@@ -143,7 +143,7 @@ if __name__ == "__main__":
             team = Board.RED
         else:
             team = Board.GREEN
-        b = m.search(b, team)
+        b = m.search(b, team)[0]
         i += 1
         print(b)
         print("\n")
