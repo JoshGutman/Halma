@@ -17,10 +17,6 @@ class Board:
         else:
             self.board = board_array
 
-            for lst in self.board:
-                for node in lst:
-                    node.starting_position = Board.EMPTY
-            
             for i in range(4):
                 for j in range(4-i):
 

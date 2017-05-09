@@ -10,18 +10,20 @@ class Minimax:
         self.depth_limit = 1
         self.max_team = None
         self.min_team = None
-        self.minimum = 10000000000
-        self.maximum = (0,0,0)
+        self.count = 0
 
-        self.move = None
 
+    # Judge points based off of distance away from opposite corner.
+    # If the piece makes it to the other zone, that piece doesn not
+    # add any points to the score
     def score(self, board, team):
         score = 0
 
         def _distance(node1, node2):
             #return abs(node2.coords[0]-node1.coords[0]) + abs(node2.coords[1]-node1.coords[1])
             return math.sqrt((node1.coords[0]-node2.coords[0])**2 + (node1.coords[1]-node2.coords[1])**2)
-        
+
+        '''
         def _least_distance(node):
             if node.val == Board.GREEN:
                 target = board.red_starts
@@ -36,7 +38,7 @@ class Minimax:
                     minimum = pmin
                     n = t
             return (n, minimum)
-            
+        ''' 
             
 
         pieces = []
@@ -47,12 +49,24 @@ class Minimax:
                     pieces.append(node)
 
         for p in pieces:
+            '''
             if p.val == Board.RED and p.starting_position == Board.GREEN:
                 pass
             elif p.val == Board.GREEN and p.starting_position == Board.RED:
                 pass
             else:
                 score += _least_distance(p)[1]
+            '''
+
+            if p.val == Board.RED and p.starting_position == Board.GREEN:
+                pass
+            elif p.val == Board.GREEN and p.starting_position == Board.RED:
+                pass
+            else:
+                if team == Board.RED:
+                    score += _distance(p, board.board[board.size-1][board.size-1])
+                else:
+                    score += _distance(p, board.board[0][0])
             
 
         return score
@@ -74,6 +88,7 @@ class Minimax:
         def id_search(board, team, start, end, depth):
 
             new_board = board.move_piece(start, end)
+            self.count += 1
             score = self.score(new_board, self.min_team)
 
             if self.alpha_beta:
@@ -111,7 +126,7 @@ class Minimax:
                         k = key
                         v = value
             self.depth_limit += 1
-                
+
         return board.move_piece(k.coords, v.coords)       
         
             
