@@ -4,10 +4,10 @@ from minimax import Minimax
 
 class GUI:
 
-    def __init__(self, size):
+    def __init__(self, size, time=30):
         root = tk.Tk()
         root.wm_title("Halma")
-        window = Window(size, master=root)
+        window = Window(size, time, master=root)
         window.mainloop()
         self.size = size
         
@@ -15,13 +15,12 @@ class GUI:
 class Window(tk.Frame):
 
     # If an 8x8 board is desired, size should be 8 (as opposed to 64)
-    def __init__(self, size, master=None):
+    def __init__(self, size, time = 30, master=None):
 
         assert size > 4
-        
         super().__init__(master)
         self.master = master
-
+        self.time = time
         # Images for buttons
         self.image_size = "normal"
         self.red = tk.PhotoImage(file="images/red_{}.gif".format(self.image_size))
@@ -262,7 +261,7 @@ class Window(tk.Frame):
 
 
     def ai_vs_ai(self):
-        m = Minimax(1, True)
+        m = Minimax(self.time, True)
         i = 0
         while self.board.check_win() == Board.EMPTY:
             if i % 2 == 0:
@@ -292,7 +291,7 @@ class Window(tk.Frame):
         self.ai_team = team
         self.only_allow_valid_moves = True
         # AI time limit defined here
-        self.m = Minimax(1, True)
+        self.m = Minimax(self.time, True)
         self.master.update()
 
 
@@ -314,13 +313,17 @@ class Window(tk.Frame):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) == 3:
+        time = int(sys.argv[2])
+    else:
+        time = 30
     if len(sys.argv) == 2:           
         size = int(sys.argv[1])
         if size == 8 or size == 10 or size == 16:
-            GUI(size)
+            GUI(size, time)
         else:
-            GUI(8)
+            GUI(8, time)
     else:
-        GUI(8)
+        GUI(8, time)
 
 
