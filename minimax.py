@@ -2,7 +2,6 @@ import math
 import time
 from board import Board
 
-# 5:04 PM
 class Minimax:
 
     def __init__(self, time_limit, alpha_beta):
@@ -48,20 +47,21 @@ class Minimax:
                     pieces.append(node)
 
         for p in pieces:
-            score += _least_distance(p)[1]
+            if p.val == Board.RED and p.starting_position == Board.GREEN:
+                pass
+            elif p.val == Board.GREEN and p.starting_position == Board.RED:
+                pass
+            else:
+                score += _least_distance(p)[1]
+            
 
         return score
 
 
 
-    def test(self, board, team):
-        self.start_time = time.time()
-        x = self.search(board, team)
-        return board.move_piece(x[0], x[1])
-
-
     def search(self, board, team):
-
+        self.start_time = time.time()
+        
         # Less points = better
         self.min_team = team
         if team == Board.RED:
@@ -74,7 +74,11 @@ class Minimax:
         def id_search(board, team, start, end, depth):
 
             new_board = board.move_piece(start, end)
-            score = self.score(new_board, team)
+            score = self.score(new_board, self.min_team)
+
+            if self.alpha_beta:
+                if score > self.alpha and team == self.max_team:
+                    return (score, start, end) 
 
             if time.time() - self.start_time < self.time_limit and depth < self.depth_limit and new_board.check_win() == Board.EMPTY:
                 
@@ -91,7 +95,9 @@ class Minimax:
 
             return (score, start, end)
 
-            
+
+        self.depth_limit = 1
+        self.alpha = 100000000
         minimum = (1000000000,0,0)
         k = None
         v = None
@@ -101,11 +107,12 @@ class Minimax:
                     score = id_search(board, team, key.coords, value.coords, 0)
                     if score[0] < minimum[0]:
                         minimum = score
+                        self.alpha = minimum[0]
                         k = key
                         v = value
             self.depth_limit += 1
                 
-        return k.coords,v.coords       
+        return board.move_piece(k.coords, v.coords)       
         
             
 
@@ -121,7 +128,7 @@ if __name__ == "__main__":
             team = Board.RED
         else:
             team = Board.GREEN
-        b = m.test(b, team)
+        b = m.search(b, team)
         i += 1
         print(b)
         print("\n")

@@ -236,6 +236,7 @@ class Window(tk.Frame):
     # and normal (64x64 tiles). Called by the sizemenu commands
     def change_size(self, size):
         self.image_size = size
+        
         for lst in self.buttons:
             for button in lst:
                 if size == "small":
@@ -245,6 +246,9 @@ class Window(tk.Frame):
                     button.config(height=64)
                     button.config(width=64)
 
+        
+        self.master.update()
+
 
     def toggle_valid_moves(self):
         self.only_allow_valid_moves = not self.only_allow_valid_moves
@@ -252,14 +256,14 @@ class Window(tk.Frame):
 
 
     def ai_vs_ai(self):
-        m = Minimax(1, None)
+        m = Minimax(1, True)
         i = 0
         while self.board.check_win() == Board.EMPTY:
             if i % 2 == 0:
                 team = Board.GREEN
             else:
                 team = Board.RED
-            self.board = m.test(self.board, team)
+            self.board = m.search(self.board, team)
             i += 1
             self.display_board(self.board)
             self.master.update()

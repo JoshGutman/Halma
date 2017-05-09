@@ -16,6 +16,11 @@ class Board:
 
         else:
             self.board = board_array
+
+            for lst in self.board:
+                for node in lst:
+                    node.starting_position = Board.EMPTY
+            
             for i in range(4):
                 for j in range(4-i):
 
@@ -42,6 +47,7 @@ class Board:
             self.board.append([])
             for j in range(self.size):
                 self.board[i].append(Node(Board.EMPTY, (i,j)))
+                self.board[i][j].starting_position = Board.EMPTY
 
 
         for i in range(4):
