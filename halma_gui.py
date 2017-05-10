@@ -1,13 +1,16 @@
 import tkinter as tk
+#import threading
+#import multiprocessing
+import time
 from board import *
 from minimax import Minimax
 
 class GUI:
 
-    def __init__(self, size, time=30):
+    def __init__(self, size, time_limit=30):
         root = tk.Tk()
         root.wm_title("Halma")
-        window = Window(size, time, master=root)
+        window = Window(size, time_limit, master=root)
         window.mainloop()
         self.size = size
         
@@ -15,12 +18,12 @@ class GUI:
 class Window(tk.Frame):
 
     # If an 8x8 board is desired, size should be 8 (as opposed to 64)
-    def __init__(self, size, time = 30, master=None):
+    def __init__(self, size, time=30, master=None):
 
         assert size > 4
         super().__init__(master)
         self.master = master
-        self.time = time
+
         # Images for buttons
         self.image_size = "normal"
         self.red = tk.PhotoImage(file="images/red_{}.gif".format(self.image_size))
@@ -40,6 +43,9 @@ class Window(tk.Frame):
 
         self.board = Board(size)
         self.only_allow_valid_moves = False
+
+        self.time_limit = time
+        self.current_time = time
         
         self.create_widgets()
 
@@ -261,7 +267,7 @@ class Window(tk.Frame):
 
 
     def ai_vs_ai(self):
-        m = Minimax(self.time, True)
+        m = Minimax(self.time_limit, True)
         i = 0
         while self.board.check_win() == Board.EMPTY:
             if i % 2 == 0:
@@ -291,11 +297,17 @@ class Window(tk.Frame):
         self.ai_team = team
         self.only_allow_valid_moves = True
         # AI time limit defined here
-        self.m = Minimax(self.time, True)
+        self.m = Minimax(self.time_limit, True)
         self.master.update()
 
 
     def ai_move(self):
+        self.current_time = self.time_limit
+        #p = multiprocessing.Pool(1)
+        #p.apply_async(self.timer)
+        #threading.Thread(target=self.timer())
+        #self.timer()
+        #self.timer(True)
         result = self.m.search(self.board, self.ai_team)
         self.board = self.board.move_piece(result[1].coords, result[2].coords)
 
@@ -312,18 +324,59 @@ class Window(tk.Frame):
             self.buttons[result[2].coords[0]][result[2].coords[1]].image = self.hlgreen
 
 
+    '''
+    def timer(self):
+        if self.current_time > 0:
+            self.status.config(text="AI is thinking... Time: {}".format(self.current_time))
+            self.master.update()
+            self.current_time -= 1
+            self.master.after(1000, self.timer)
+        else:
+            self.status.config(text="Time up!")
+    '''
+
+    '''
+    def timer(self, start):
+        if start:
+            self.new_window = tk.Toplevel(self.master)
+            self.time_label = tk.Label(self.new_window, text="{}".format(self.current_time))
+            self.time_label.pack()
+            self.current_time -= 1
+
+        else:
+            self.time_label.config(text="{}".format(self.current_time))
+            self.current_time -= 1
+            if self.current_time > 0:
+                self.new_window.after(1000, self.timer, False)
+            else:
+                self.new_window.destroy()
+    '''
+
+    '''
+    def timer(self):
+        while self.current_time > 0:
+            self.status.config(text="AI is thinking... Time: {}".format(self.current_time))
+            self.master.update()
+            self.current_time -= 1
+            time.sleep(1)
+
+        self.status.config(text="Time up!")
+    '''
+    
+
+
 if __name__ == "__main__":
     if len(sys.argv) == 3:
-        time = int(sys.argv[2])
+        time_limit = int(sys.argv[2])
     else:
-        time = 30
+        time_limit = 30
     if len(sys.argv) == 2:           
         size = int(sys.argv[1])
         if size == 8 or size == 10 or size == 16:
-            GUI(size, time)
+            GUI(size, time_limit)
         else:
-            GUI(8, time)
+            GUI(8, time_limit)
     else:
-        GUI(8, time)
+        GUI(8, time_limit)
 
 
