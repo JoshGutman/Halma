@@ -129,6 +129,16 @@ class Window(tk.Frame):
     # This method is run when a button is clicked
     def action(self, i, j):
 
+        # check to see if the game is won
+        win = self.board.check_win()
+        if win == "R":
+            self.status.config(text="Red Player Has Won!!!!!!!!!!!!!!!!!")
+            return
+        elif win == "G":
+            self.status.config(text="Green Player Has Won!!!!!!!!!!!!!!!!!")
+            return
+
+
         
         # Takes in (i,j) and returns "letter-number"
         def _notation(coords):
@@ -182,12 +192,8 @@ class Window(tk.Frame):
                 self.move_count += 1
                 self.board = self.board.move_piece((x,y), (i,j))
 
-                # check to see if the game is won
-                win = self.board.check_win()
-                if win == "R":
-                    self.status.config(text="Red Player Has Won!!!!!!!!!!!!!!!!!")
-                elif win == "G":
-                    self.status.config(text="Green Player Has Won!!!!!!!!!!!!!!!!!")
+                
+                
 
             else:
                 self.status.config(text="Move cancelled")
