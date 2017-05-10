@@ -120,6 +120,8 @@ class Window(tk.Frame):
         self.ai_select.add_command(label="AI is team GREEN", command=lambda:self.ai_vs_human(Board.GREEN))
         self.aimenu.add_cascade(label="AI vs. Human", menu=self.ai_select)
         self.menubar.add_cascade(label="AI", menu=self.aimenu)
+        self.aimenu.add_command(label="Get AI move count", command=self.get_move_count)
+        self.aimenu.add_command(label="Get score", command=self.get_score)
 
         self.new_game()
 
@@ -303,6 +305,8 @@ class Window(tk.Frame):
 
     def ai_move(self):
         self.current_time = self.time_limit
+        self.status.config(text="AI is thinking...")
+        self.master.update()
         #p = multiprocessing.Pool(1)
         #p.apply_async(self.timer)
         #threading.Thread(target=self.timer())
@@ -313,6 +317,11 @@ class Window(tk.Frame):
 
         self.display_board(self.board)
 
+
+        # Takes in (i,j) and returns "letter-number"
+        def _notation(coords):
+            return chr(coords[1]+97) + str(-1*coords[0]+self.size)
+
         # Sorry...
         self.buttons[result[1].coords[0]][result[1].coords[1]].config(image=self.highlight)
         self.buttons[result[1].coords[0]][result[1].coords[1]].image = self.highlight
@@ -322,6 +331,23 @@ class Window(tk.Frame):
         else:
             self.buttons[result[2].coords[0]][result[2].coords[1]].config(image=self.hlgreen)
             self.buttons[result[2].coords[0]][result[2].coords[1]].image = self.hlgreen
+
+        self.status.config(text="Moved piece at {} to {}".format(_notation(result[1].coords), _notation(result[2].coords)))
+        
+
+
+    def get_move_count(self):
+        try:
+            print(self.m.count)
+        except:
+            pass
+
+    def get_score(self):
+        try:
+            print("Red Score: {}".format(self.m.get_score(self.board)[0]))
+            print("Green Score: {}".format(self.m.get_score(self.board)[1]))
+        except:
+            pass
 
 
     '''

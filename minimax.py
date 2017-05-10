@@ -13,6 +13,49 @@ class Minimax:
         self.count = 0
 
 
+    def get_score(self, board):
+        red_score = 0
+        green_score = 0
+
+        def _distance(node1, node2):
+            #return abs(node2.coords[0]-node1.coords[0]) + abs(node2.coords[1]-node1.coords[1])
+            return math.sqrt((node1.coords[0]-node2.coords[0])**2 + (node1.coords[1]-node2.coords[1])**2)
+        
+        def _least_distance(node):
+            if node.val == Board.GREEN:
+                target = board.red_starts
+            else:
+                target = board.green_starts
+
+            minimum = _distance(node, target[0])
+            n = target[0]
+            for t in target:
+                pmin = _distance(node, t)
+                if pmin < minimum:
+                    minimum = pmin
+                    n = t
+            return (n, minimum)
+            
+            
+
+        reds = []
+        greens = []
+
+        for lst in board.board:
+            for node in lst:
+                if node.val == Board.RED:
+                    reds.append(node)
+                elif node.val == Board.GREEN:
+                    greens.append(node)
+
+        for r in reds:
+            red_score += _least_distance(r)[1]
+
+        for g in greens:
+            green_score += _least_distance(g)[1]
+
+        return (red_score, green_score)
+
 
     # Judge points based off of distance away from opposite corner.
     # If the piece makes it to the other zone, that piece does not
