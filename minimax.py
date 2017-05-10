@@ -13,8 +13,9 @@ class Minimax:
         self.count = 0
 
 
+
     # Judge points based off of distance away from opposite corner.
-    # If the piece makes it to the other zone, that piece doesn not
+    # If the piece makes it to the other zone, that piece does not
     # add any points to the score
     def score(self, board, team):
         score = 0
@@ -27,12 +28,19 @@ class Minimax:
             
 
         pieces = []
+        enemy_pieces = []
 
         # add the pieces relating to your team
         for lst in board.board:
             for node in lst:
                 if node.val == team:
                     pieces.append(node)
+                elif node.val != board.EMPTY:
+                    enemy_pieces.append(node)
+
+
+        for e in enemy_pieces:
+            score += len(self._get_node_jumps(board, e))
 
         
         for p in pieces:
@@ -54,6 +62,62 @@ class Minimax:
         return score
 
 
+
+    # Call on enemy team
+    def _get_node_jumps(self, board, node):
+
+        def __get_jump_coords(start, end):
+            val = (start[0]-end[0], start[1]-end[1])
+            
+            if val[0] < 0:
+                x = val[0]-1
+            elif val[0] == 0:
+                x = 0
+            else:
+                x = val[0]+1
+
+            if val[1] < 0:
+                y = val[1]-1
+            elif val[1] == 0:
+                y = 0
+            else:
+                y = val[1]+1
+
+            out = (start[0]-x,start[1]-y)
+
+            if out[0] >= 0 and out[0] < board.size:
+                if out[1] >= 0 and out[1] < board.size:
+                    return out
+
+            return None
+
+
+
+        def _distance(node1, node2):
+            # the equation to determine the distance to corner
+            return math.sqrt((node1.coords[0]-node2.coords[0])**2 + (node1.coords[1]-node2.coords[1])**2)
+
+        team = node.val
+        jumps = []
+        
+        for n in node.neighbors:
+            if n.val != Board.EMPTY and n.val != team:
+                jump = __get_jump_coords(node.coords, n.coords)
+                if jump is None:
+                    continue
+                else:
+                    jump_node = board.board[jump[0]][jump[1]]
+                    if team == Board.GREEN:
+                        if _distance(jump_node, board.board[0][0]) < _distance(node, board.board[0][0]):
+                            jumps.append(jump)
+                    else:
+                        if _distance(jump_node, board.board[board.size-1][board.size-1]) < _distance(node, board.board[board.size-1][board.size-1]):
+                            jumps.append(jump)
+
+        return jumps        
+                    
+
+        
 
     def search(self, board, team):
         self.start_time = time.time()

@@ -122,7 +122,6 @@ class Board:
                 if self.board[i][j].val == color:
                     moves[self.board[i][j]] = []
 
-
         def _check_jumps(node):
             for n in node.neighbors:
                 if n.val != Board.EMPTY:
@@ -175,6 +174,7 @@ class Board:
             _check_jumps(move)
 
         return moves
+
                         
 
 
